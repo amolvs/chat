@@ -24,7 +24,7 @@ if (!isset($_SESSION['user_uuid'])) {
 <div class="main-wrapper">
 	<header class="header">
 		<div class="logo">
-			<a href="#">My Messenger</a>
+			<a href="#">My Messenger (<?php echo ucwords($_SESSION['fullname']); ?>)</a>
 		</div>
 		<div class="menu">
 			<a href="#" onclick="logout()">Logout&nbsp;<i class="fas fa-sign-out-alt"></i></a>
@@ -33,11 +33,18 @@ if (!isset($_SESSION['user_uuid'])) {
 	<div class="flex-box">
 		<div class="box-1">
 			<div class="messenger">
-				<div class="heading"><i class="fab fa-facebook-messenger"></i>&nbsp;<span>Messenger</span></div>
+				<div class="heading">
+					<!-- <i class="fab fa-facebook-messenger"></i>&nbsp;<span>Messenger</span> -->
+					<input type="text" class="search-user" placeholder="Search User" />
+					<div class="search-users-list" hidden>
+						<select class="userList">
+						</select>
+					</div>
+				</div>
 				<div class="users">
 				
 					<!-- Dynamic Users -->	
-			   <!-- <div class="user">
+			   		<!-- <div class="user">
 						<div class="user-image"></div>
 						<div class="user-details">
 							<span><strong>Rizwan Khan</strong></span>
@@ -55,18 +62,16 @@ if (!isset($_SESSION['user_uuid'])) {
 				<div class="messages">
 					<div class="chats">
 						<div class="message-container">
-							
-
-							<!-- <div class="message-block">
+							<!--
+							<div class="message-block">
 								<div class="user-icon"></div>
 								<div class="message">Hi, Govardhan hhow are you..?</div>
 							</div>
 							<div class="message-block received-message" style="">
 								<div class="user-icon"></div>
 								<div class="message">Hi, Govardhan hhow are you..?</div>
-							</div> -->
-						
-
+							</div>
+							-->
 						</div>
 					</div>
 					<div class="write-message">

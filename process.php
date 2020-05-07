@@ -96,4 +96,10 @@ if (isset($_POST['connectUser']) && $_SERVER['REQUEST_METHOD'] == 'POST') {
 	exit();
 }
 
+if (isset($_POST['searchUser']) && $_SERVER['REQUEST_METHOD'] == 'POST') {
+	$user = new User();
+	echo json_encode($user->searchUser($_POST['keyword']));
+	exit();
+}
+
 ?>

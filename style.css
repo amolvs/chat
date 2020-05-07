@@ -250,3 +250,9 @@ html, body{
 #loader{
 	height: 30px;
 }
+
+.message-time {
+    font-size: 10px;
+    float: right;
+    margin: 15px 4px 4px 10px;
+}

@@ -12,12 +12,12 @@ $("#register-btn").on('click', function(e){
 			success : function(response){
 
 				$("#register-btn").html(btnHTML);
-				console.log(response.message);
+				// console.log(response.message);
 				$("#register-form").trigger("reset");
 				changeForm($(".login-register-btn"));
 			},
 			error : function(er){
-				console.log(er);
+				// console.log(er);
 			}
 
 		});
@@ -38,7 +38,7 @@ $("#register-btn").on('click', function(e){
 				
 				var response = JSON.parse(resp);
 
-				console.log(response);
+				// console.log(response);
 
 				if (response.status == 200) {
 					var token = response.message.token;

@@ -20,12 +20,12 @@ class User
 	function __construct()
 	{	
 		try {
-			$this->con = new PDO('mysql:host=localhost;dbname=phpfirebase', 'root', '');
+			$this->con = new PDO('mysql:host=localhost;dbname=phpfirebase', 'root', 'root');
 			$this->con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     		$this->con->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 			// This assumes that you have placed the Firebase credentials in the same directory
 			// as this PHP file.
-			$serviceAccount = ServiceAccount::fromJsonFile(__DIR__.'/my-test-app-91f99-firebase-adminsdk-tftew-34a984e387.json');
+			$serviceAccount = ServiceAccount::fromJsonFile(__DIR__.'/ps-chat-c3965-firebase-adminsdk-ylpl2-8cfdc33692.json');
 
 			$this->firebase = (new Factory)
 			     ->withServiceAccount($serviceAccount)
@@ -169,20 +169,24 @@ class User
 			return array('status'=> 200, 'message'=> $ar);
 
 		}
-		
-
 
 	}
 
 	public function getUsers(){
-		$query = $this->con->query("SELECT uuid,fullname,username FROM users");
+		$query = $this->con->query("SELECT uuid,fullname,username FROM users
+			WHERE uuid IN (SELECT user_1_uuid as id
+			FROM chat_record
+			WHERE user_2_uuid = '" . $_SESSION['user_uuid'] . "'
+			UNION
+			SELECT user_2_uuid as id
+			FROM chat_record
+			WHERE user_1_uuid = '" . $_SESSION['user_uuid'] . "')");
 		$ar = [];
 		while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
 			$ar[] = $row;
 		}
 
 		return array('status'=>200, 'message'=>['users'=>$ar]);
-
 	}
 
 	public function logout(){
@@ -195,20 +199,21 @@ class User
 			
 			return array('status'=>200, 'message'=>'User Logout Successfully');
 		}
-		return array('status'=>303, 'message'=>'Logout Fail');
 
+		return array('status'=>303, 'message'=>'Logout Fail');
 	}
 
+	public function searchUser($keyword){
+		$query = $this->con->query("SELECT uuid,fullname,username FROM users
+			WHERE fullname like '%$keyword%'");
+		$ar = [];
+		while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+			$ar[] = $row;
+		}
 
-
+		return array('status'=>200, 'message'=>['users'=>$ar]);
+	}
 
 }
-
-
-
-
-
-
-
 
 ?>
