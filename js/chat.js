@@ -1,4 +1,4 @@
-var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
+var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [], userRef = '';;
 		firebase.auth().onAuthStateChanged(function(user) {
 		  if (user) {
 		    // console.log(user);
@@ -47,7 +47,7 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 					if(resp.status == 200){
 						var users = resp.message.users;
 						var usersHTML = '';
-						var messageCount = '';
+						$(".users").html(usersHTML);
 						$.each(users, function(index, value){
 							// console.log(value.uuid)
 							if (user_uuid != value.uuid) {
@@ -58,20 +58,47 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 								} else {
 									loginStatus = "<span class='login-status'><i class='fa fa-circle-o' aria-hidden='true'></i> Offline</span>";
 								}
-								
-								usersHTML += '<div class="user" uuid="'+value.uuid+'">'+
+
+								db.collection('chat')
+									.where('chat_uuid', '==', value.chat_uuid)
+									.where('user_2_uuid', '==', user_uuid)
+									.where('view_status', '==', 0)
+									.get()
+									.then(function(querySnapshot){
+										var unreadCount = querySnapshot.size;
+										if (unreadCount == 0 || value.uuid == userRef) {
+											if (value.uuid == userRef)
+												userRef = '';
+
+											usersHTML = '<div class="user" uuid="'+value.uuid+'">'+
 												'<div class="user-image"></div>'+
 												'<div class="user-details">'+
-													'<span><strong>'+ value.fullname+'<span class="count"></span></strong></span>'+
+													'<span>'+
+														'<strong>'+value.fullname+'</strong>'+
+													'</span>'+
 													loginStatus+
 												'</div>'+
 											'</div>';
+										} else {
+											usersHTML = '<div class="user" uuid="'+value.uuid+'">'+
+													'<div class="user-image"></div>'+
+													'<div class="user-details">'+
+														'<span>'+
+															'<strong>'+value.fullname+'</strong>'+
+															'<span class="count">'+unreadCount+'</span>'+
+														'</span>'+
+														loginStatus+
+													'</div>'+
+												'</div>';
+										}
+										$(".users").append(usersHTML);
+									});
 
 								userList.push({user_uuid: value.uuid, username: value.username});
 							}
 						});
 
-						$(".users").html(usersHTML);
+						// $(".users").html(usersHTML);
 
 					}else{
 						// console.log(response.message);
@@ -87,6 +114,7 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 
 		$(document.body).on('click', '.user', function(){
 			// console.log($(this).attr('uuid'));
+			userRef = $(this).attr('uuid');
 			getUsers();
 			
 			var name = $(this).find("strong").text();
@@ -262,7 +290,6 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 						var users = resp.message.users;
 						var usersListHTML = '';
 						usersListHTML += '<option value="">Select User</option>';
-						var messageCount = '';
 						$.each(users, function(index, value){
 							// console.log(value.uuid)
 							if (user_uuid != value.uuid) {

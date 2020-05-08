@@ -184,7 +184,17 @@ class User
 	}
 
 	public function getUsers(){
-		$query = $this->con->query("SELECT uuid,fullname,username,log_in
+		$query = $this->con->query("SELECT uuid,fullname,username,log_in, (
+					SELECT
+						chat_uuid
+					FROM
+						chat_record
+					WHERE
+						(user_1_uuid = '" . $_SESSION['user_uuid'] . "' AND user_2_uuid = users.uuid)
+						OR
+						(user_1_uuid = users.uuid AND user_2_uuid = '" . $_SESSION['user_uuid'] . "')
+					LIMIT 1
+				) as chat_uuid
 			FROM users
 			WHERE uuid IN (SELECT user_1_uuid as id
 				FROM chat_record
