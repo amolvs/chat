@@ -113,6 +113,9 @@ class User
 				$_SESSION['username'] = $row['username'];
 				$_SESSION['fullname'] = $row['fullname'];
 
+				$user_stmt = $this->con->prepare("UPDATE users SET log_in='Online' WHERE uuid='".$row['uuid']."'");
+				$user_stmt->execute();
+
 				$ar = [];
 				$ar['message'] =  'User Logged in Successfully';
 				$ar['user_uuid'] = $row['uuid'];
@@ -152,6 +155,15 @@ class User
 		$ar['user_1_uuid'] = $user_1_uuid;
 		$ar['user_2_uuid'] = $user_2_uuid;
 
+		$user_stmt = $this->con->prepare("SELECT log_in FROM users WHERE uuid='".$user_2_uuid."'");
+		$user_stmt->execute();
+
+		if ($user_stmt->rowCount() == 1) {
+			$ar['log_in'] = $user_stmt->fetch(PDO::FETCH_ASSOC)['log_in'];
+		} else {
+			$ar['log_in'] = 'Offline';
+		}
+
 		if ($chat_uuid_stmt->rowCount() == 1) {
 			$ar['chat_uuid'] = $chat_uuid_stmt->fetch(PDO::FETCH_ASSOC)['chat_uuid'];
 			return array('status'=>200, 'message'=> $ar);
@@ -167,20 +179,20 @@ class User
 			$ar['chat_uuid'] = $chat_uuid;
 			
 			return array('status'=> 200, 'message'=> $ar);
-
 		}
 
 	}
 
 	public function getUsers(){
-		$query = $this->con->query("SELECT uuid,fullname,username FROM users
+		$query = $this->con->query("SELECT uuid,fullname,username,log_in
+			FROM users
 			WHERE uuid IN (SELECT user_1_uuid as id
-			FROM chat_record
-			WHERE user_2_uuid = '" . $_SESSION['user_uuid'] . "'
-			UNION
-			SELECT user_2_uuid as id
-			FROM chat_record
-			WHERE user_1_uuid = '" . $_SESSION['user_uuid'] . "')");
+				FROM chat_record
+				WHERE user_2_uuid = '" . $_SESSION['user_uuid'] . "'
+				UNION
+				SELECT user_2_uuid as id
+				FROM chat_record
+				WHERE user_1_uuid = '" . $_SESSION['user_uuid'] . "')");
 		$ar = [];
 		while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
 			$ar[] = $row;
@@ -192,6 +204,8 @@ class User
 	public function logout(){
 
 		if (isset($_SESSION['username'])) {
+			$user_stmt = $this->con->prepare("UPDATE users SET log_in='Offline' WHERE uuid='".$_SESSION['user_uuid']."'");
+			$user_stmt->execute();
 			
 			unset($_SESSION['username']);
 			unset($_SESSION['user_uuid']);

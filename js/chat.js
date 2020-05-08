@@ -51,21 +51,24 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 						$.each(users, function(index, value){
 							// console.log(value.uuid)
 							if (user_uuid != value.uuid) {
+								var login = value.log_in;
+								var loginStatus = '';
+								if (login == 'Online') {
+									loginStatus = "<span class='login-status'><i class='fa fa-circle' aria-hidden='true'></i> Online</span>";
+								} else {
+									loginStatus = "<span class='login-status'><i class='fa fa-circle-o' aria-hidden='true'></i> Offline</span>";
+								}
 								
 								usersHTML += '<div class="user" uuid="'+value.uuid+'">'+
 												'<div class="user-image"></div>'+
 												'<div class="user-details">'+
 													'<span><strong>'+ value.fullname+'<span class="count"></span></strong></span>'+
-													'<span>Last Login</span>'+
+													loginStatus+
 												'</div>'+
 											'</div>';
 
 								userList.push({user_uuid: value.uuid, username: value.username});
-
-
 							}
-							
-
 						});
 
 						$(".users").html(usersHTML);
@@ -84,8 +87,10 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 
 		$(document.body).on('click', '.user', function(){
 			// console.log($(this).attr('uuid'));
+			getUsers();
 			
 			var name = $(this).find("strong").text();
+			// var loginStatus = $(this).find(".login-status").text().trim();
 			var user_1 = user_uuid;
 			var user_2 = $(this).attr('uuid');
 			$('.message-container').html('Connecting...!');
@@ -107,11 +112,13 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 						user_2_name : name
 					};
 					$('.message-container').html('Say Hi to '+name);
+					$(".logIn").text('(' + resp.message.log_in + ')');
+
 
 					db.collection('chat')
 						.where('chat_uuid', '==', chat_data.chat_uuid)
 						.orderBy('time')
-						.limit(25)
+						.limit(10)
 						.get()
 						.then(function(querySnapshot){
 							chatHTML = '';
@@ -123,7 +130,7 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 								
 								var hours = myDate.getHours();
 								var minutes = myDate.getMinutes();
-								var ampm = hours >= 12 ? 'pm' : 'am';
+								var ampm = hours >= 12 ? 'PM' : 'AM';
 								hours = hours % 12;
 								hours = hours ? hours : 12; // the hour '0' should be '12'
 								minutes = minutes < 10 ? '0'+minutes : minutes;
@@ -140,10 +147,14 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 													'<div class="message">'+ doc.data().message +'<div class="message-time">'+ strTime +'</div></div>'+
 												'</div>';
 								}
+
+								if (doc.data().user_2_uuid == user_uuid) {
+									db.collection("chat").doc(doc.id).update({view_status: 1});
+								}
 							});
 
-						$(".message-container").html(chatHTML);
-					});
+							$(".message-container").html(chatHTML);
+						});
 
 					if (chat_uuid == "") {
 						chat_uuid = chat_data.chat_uuid;
@@ -158,13 +169,15 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 		$(".send-btn").on('click', function(){
 			var message = $(".message-input").val();
 			if(message != ""){
-				db.collection('chat').add({
+				db.collection('chat')
+				.add({
 				    message : message,
 				    user_1_uuid : user_uuid,
 				    user_2_uuid : chat_data.user_2_uuid,
 				    chat_uuid : chat_data.chat_uuid,
-				   	user_1_isView : 0,
-				   	user_2_isView : 0,
+				   	// user_1_isView : 1,
+				   	// user_2_isView : 0,
+				   	view_status : 0,
 				    time : new Date(),
 				})
 				.then(function(docRef) {
@@ -172,7 +185,7 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 				    // console.log("Document written with ID: ", docRef.id);
 				})
 				.catch(function(error) {
-				    console.error("Error adding document: ", error);
+				    // console.error("Error adding document: ", error);
 				});
 			}
 
@@ -182,56 +195,57 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 		var newMessage = '';
 		function realTime(){
 			db.collection('chat')
-			.where('chat_uuid', '==', chat_data.chat_uuid)
-			.orderBy('time')
-			.onSnapshot(function(snapshot) {
-				newMessage = '';
-		        snapshot.docChanges().forEach(function(change) {
-		            if (change.type === "added") {
-		                // console.log(change.doc.data().message);
-		                var myDate = new Date(1000 * doc.data().time.seconds);
-						var month = myDate.getMonth()+1;
-						var day = myDate.getDate();
-						var viewDate = (day<10 ? '0' : '') + day + '/' + (month<10 ? '0' : '') + month + '/' + myDate.getFullYear();
-						
-						var hours = myDate.getHours();
-						var minutes = myDate.getMinutes();
-						var ampm = hours >= 12 ? 'pm' : 'am';
-						hours = hours % 12;
-						hours = hours ? hours : 12; // the hour '0' should be '12'
-						minutes = minutes < 10 ? '0'+minutes : minutes;
-						var strTime = hours + ':' + minutes + ' ' + ampm;
+				.where('chat_uuid', '==', chat_data.chat_uuid)
+				.orderBy('time')
+				.onSnapshot(function(snapshot) {
+					newMessage = '';
+					snapshot.docChanges().forEach(function(change) {
+						if (change.type === "added") {
+							var myDate = new Date(1000 * change.doc.data().time.seconds);
+							var month = myDate.getMonth()+1;
+							var day = myDate.getDate();
+							var viewDate = (day<10 ? '0' : '') + day + '/' + (month<10 ? '0' : '') + month + '/' + myDate.getFullYear();
+							
+							var hours = myDate.getHours();
+							var minutes = myDate.getMinutes();
+							var ampm = hours >= 12 ? 'PM' : 'AM';
+							hours = hours % 12;
+							hours = hours ? hours : 12; // the hour '0' should be '12'
+							minutes = minutes < 10 ? '0'+minutes : minutes;
+							var strTime = hours + ':' + minutes + ' ' + ampm;
 
-		                if (change.doc.data().user_1_uuid == user_uuid) {
-							newMessage += '<div class="message-block received-message">'+
-												'<div class="user-icon"></div>'+
-												'<div class="message">'+ change.doc.data().message +'<div class="message-time">'+ strTime +'</div></div>'+
-											'</div>';
-						}else{
-							newMessage += '<div class="message-block">'+
-												'<div class="user-icon"></div>'+
-												'<div class="message">'+ change.doc.data().message +'<div class="message-time">'+ strTime +'</div></div>'+
-											'</div>';
+							if (change.doc.data().user_1_uuid == user_uuid) {
+								newMessage += '<div class="message-block received-message">'+
+													'<div class="user-icon"></div>'+
+													'<div class="message">'+ change.doc.data().message +'<div class="message-time">'+ strTime +'</div></div>'+
+												'</div>';
+							} else {
+								newMessage += '<div class="message-block">'+
+													'<div class="user-icon"></div>'+
+													'<div class="message">'+ change.doc.data().message +'<div class="message-time">'+ strTime +'</div></div>'+
+												'</div>';
+							}
+							if (change.doc.data().user_2_uuid == user_uuid) {
+								db.collection("chat").doc(change.doc.id).update({view_status: 1});
+							}
 						}
-		            }
-		            if (change.type === "modified") {
-		            }
-		            if (change.type === "removed") {
-		            }
-		        });
+						if (change.type === "modified") {
+						}
+						if (change.type === "removed") {
+						}
+					});
 
-		        if (chatHTML != newMessage) {
-		        	$('.message-container').append(newMessage);
-		        }
-		        
-		        $(".chats").scrollTop($(".chats")[0].scrollHeight);
+					if (chatHTML != newMessage) {
+						$('.message-container').append(newMessage);
+					}
 
-		    });
+					$(".chats").scrollTop($(".chats")[0].scrollHeight);
+				});
 		}
 
 		$(".search-user").keyup(function(){
 			var searchTxt = $(".search-user").val();
-			console.log('searchTxt:' + searchTxt);
+			// console.log('searchTxt:' + searchTxt);
 			$(".search-users-list").hide();
 			if (searchTxt == '')
 				return;
@@ -281,6 +295,7 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 			var user_2 = user_uuid_2;
 			$('.message-container').html('Connecting...!');
 			$(".name").text(name);
+			$(".logIn").text('');
 
 			$.ajax({
 				url : 'process.php',
@@ -311,7 +326,7 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 							
 							var hours = myDate.getHours();
 							var minutes = myDate.getMinutes();
-							var ampm = hours >= 12 ? 'pm' : 'am';
+							var ampm = hours >= 12 ? 'PM' : 'AM';
 							hours = hours % 12;
 							hours = hours ? hours : 12; // the hour '0' should be '12'
 							minutes = minutes < 10 ? '0'+minutes : minutes;
@@ -328,6 +343,10 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 												'<div class="message">'+ doc.data().message +'<div class="message-time">'+ strTime +'</div></div>'+
 											'</div>';
 							}
+
+							if (doc.data().user_2_uuid == user_uuid) {
+								db.collection("chat").doc(doc.id).update({view_status: 1});
+							}
 						});
 
 						$(".message-container").html(chatHTML);
@@ -342,10 +361,3 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [];
 				}
 			});
 		});
-
-		/*$(window).scroll(function() {
-			console.log($(window).scrollTop() + ' + ' + $(window).height() + '==' + $(document).height());
-			if ($(window).scrollTop() + $(window).height() == $(document).height()) {
-				alert("bottom!");
-			}
-		});*/

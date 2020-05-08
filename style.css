@@ -256,3 +256,7 @@ html, body{
     float: right;
     margin: 15px 4px 4px 10px;
 }
+
+span.logIn {
+	font-size: 12px;
+}

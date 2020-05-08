@@ -58,7 +58,11 @@ if (!isset($_SESSION['user_uuid'])) {
 		</div>
 		<div class="box-2">
 			<div class="chat-container">
-				<div class="heading"><i class="fas fa-user"></i>&nbsp;<span class="name"></span></div>
+				<div class="heading">
+					<i class="fas fa-user"></i>&nbsp;
+					<span class="name"></span>
+					<span class="logIn"></span>
+				</div>
 				<div class="messages">
 					<div class="chats">
 						<div class="message-container">
