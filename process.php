@@ -6,8 +6,11 @@ CREATE DATABASE phpfirebase;
 CREATE TABLE IF NOT EXISTS phpfirebase.users (
 	id INT(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
     uuid VARCHAR(36) NOT NULL,
+    fullname VARCHAR(100) NOT NULL,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    log_in VARCHAR(10) NOT NULL DEFAULT `Offline`,
     UNIQUE KEY (uuid, username)
 );
 
@@ -17,8 +20,6 @@ CREATE TABLE `chat_record`(
     `user_2_uuid` VARCHAR(36) NOT NULL,
     UNIQUE KEY (chat_uuid)
 );
-
-ALTER TABLE users ADD fullname VARCHAR(100) NOT NULL AFTER uuid;
 
 */
 ini_set('display_errors', 1);

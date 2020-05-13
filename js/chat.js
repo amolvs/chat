@@ -365,7 +365,7 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [], use
 							time : new Date(),
 						})
 						.then(function(docRef) {
-							$(".message-input").val("");
+							$('#file-id').val('');
 						})
 						.catch(function(error) {
 							// console.error("Error adding document: ", error);
