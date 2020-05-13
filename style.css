@@ -273,3 +273,21 @@ span.count {
     font-size: 12px;
     position: relative;
 }
+
+.attachment {
+	float: right;
+	margin-right: 25px;
+	font-size: 20px;
+}
+
+.attchment-icon {
+	cursor: pointer;
+}
+
+#file-id {
+	display: none;
+}
+
+.read-status {
+	margin-left: 5px;
+}

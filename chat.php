@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_uuid'])) {
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+	<title>Chat</title>
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<!-- Firebase App is always required and must be first -->
@@ -62,6 +62,12 @@ if (!isset($_SESSION['user_uuid'])) {
 					<i class="fas fa-user"></i>&nbsp;
 					<span class="name"></span>
 					<span class="logIn"></span>
+					<div class="attachment">
+						<label for="file-id" class="attchment-icon">
+							<i class="fa fa-paperclip"></i>
+						</label>
+						<input type="file" id="file-id" accept="image/x-png,image/gif,image/jpeg,image/jpg,video/mp4,audio/mp3,audio/wma">
+					</div>
 				</div>
 				<div class="messages">
 					<div class="chats">

@@ -9,7 +9,7 @@ if (isset($_SESSION['user_uuid'])) {
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+	<title>Chat</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<!-- Firebase App is always required and must be first -->
 	<script src="https://www.gstatic.com/firebasejs/5.7.0/firebase-app.js"></script>
