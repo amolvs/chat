@@ -27,6 +27,8 @@ if (!isset($_SESSION['user_uuid'])) {
 			<a href="#">My Messenger (<?php echo ucwords($_SESSION['fullname']); ?>)</a>
 		</div>
 		<div class="menu">
+			<a href="#">User Chat&nbsp;<i class="fas fa-user"></i></a>&nbsp;&nbsp;
+			<a href="group-chat.php">Group Chat&nbsp;<i class="fas fa-users"></i></a>&nbsp;&nbsp;
 			<a href="#" onclick="logout()">Logout&nbsp;<i class="fas fa-sign-out-alt"></i></a>
 		</div>
 	</header>	
@@ -99,15 +101,7 @@ if (!isset($_SESSION['user_uuid'])) {
 </div>
 
 	<script type="text/javascript" src="js/firestore-config.js"></script>
-	<script type="text/javascript" src="js/chat.js">
-
-		
-
-	
-
-
-	</script>
-
+	<script type="text/javascript" src="js/chat.js"></script>
 
 </body>
 </html>

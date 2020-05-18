@@ -78,11 +78,11 @@ html, body{
 	background: #fff;
 	border-bottom: 1px solid #cecece;
 }
-.users{
+.users, .groups{
 	height: 100%;
 	overflow-x: hidden;
 }
-.users .user{
+.users .user, .groups .group{
 	display: flex;
 	background: transparent;
 	height: 50px;
@@ -90,25 +90,28 @@ html, body{
 	cursor: pointer;
 	transition: all 0.2s linear;
 }
-.users .user:hover{
+.users .user:hover, .groups .group:hover{
 	background: #cecece;
 }
-.users .user .user-image{
+.users .user .user-image, .groups .group .group-image{
 	width: 50px;
 	height: 50px;
 	background: #cecece;
 	border-radius: 50px;
 	padding: ;
 }
-.users .user:hover .user-image{
+.users .user:hover .user-image, .groups .group:hover .group-image{
 	background: #fff;
 }
-.users .user .user-details{
+.users .user .user-details, .groups .group .group-details{
 	height: 50px;
 	padding: 10px;
 	width: 100%;
 }
 .user-details span{
+	display: block;
+}
+.group-details span{
 	display: block;
 }
 .messages{
@@ -184,7 +187,7 @@ html, body{
 }
 
 .received-message > .message{
-	order: 1;
+	/*order: 1;*/
 }
 
 /* Login / Register */
@@ -290,4 +293,68 @@ span.count {
 
 .read-status {
 	margin-left: 5px;
+}
+
+.search-users-list, .search-groups-list {
+	float: right;
+}
+
+.search-groups-list {
+	margin-top: -36px;
+}
+
+.extra-link {
+	flex: auto;
+	margin-left: 40px;
+}
+
+.search-user, .search-group {
+    width: 50%;
+}
+
+.search-groups-list {
+	float: right;
+}
+
+.modal-content .modal-header {
+    padding: 10px !important;
+    border-bottom: none !important;
+}
+
+.modal-content .modal-footer {
+    padding: 10px !important;
+    border-top: none !important;
+}
+
+.send-name {
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.left-msg .message {
+	border-top-left-radius: 0;
+}
+.received-message .message {
+	border-top-right-radius: 0;
+}
+
+.left-msg-icon {
+	background-color: #0f81f9;
+	height: 13px;
+	width: 13px;
+	position: relative;
+	left: 6px;
+	top: 10px;
+	clip-path: polygon(0%0%,100%0%,100%100%);
+}
+
+.right-msg-icon {
+	background-color: #0f81f9;
+	height: 13px;
+	width: 13px;
+	position: relative;
+	top: 10px;
+	right: 7px;
+	clip-path: polygon(0%0%,100%0%,0%100%);
 }

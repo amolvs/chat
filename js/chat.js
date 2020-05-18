@@ -205,6 +205,7 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [], use
 
 
 						var readStatus = '';
+						var rightMsg = '';
 						if (change.doc.data().user_1_uuid == user_uuid) {
 							msgStart = '<div class="message-block received-message" id="'+change.doc.id+'">';
 							if (change.doc.data().view_status)
@@ -212,8 +213,10 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [], use
 							else
 								readStatus = '<i class="fa fa-check read-status"></i>';
 							// readStatus = '<i class="fa fa-check read-status"></i>';
+							rightMsg = '<div class="right-msg-icon"></div>';
 						} else {
-							msgStart = '<div class="message-block" id="'+change.doc.id+'">';
+							msgStart = '<div class="message-block left-msg" id="'+change.doc.id+'">'+
+								'<div class="left-msg-icon"></div>';
 						}
 						var divStrTime = '<div class="message-time">'+ strTime + readStatus +'</div>';
 
@@ -224,6 +227,7 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [], use
 												actualMessage+
 												divStrTime+
 											'</div>'+
+											rightMsg+
 										'</div>';
 						}
 						if (change.doc.data().user_2_uuid == user_uuid) {
