@@ -21,7 +21,8 @@ class Group
 	function __construct()
 	{	
 		try {
-			$this->con = new PDO('mysql:host=localhost;dbname=phpfirebase', 'root', 'root');
+			$this->con = new PDO('mysql:host=localhost;dbname=phpfirebase', 'root', 'root'); //local details
+			// $this->con = new PDO('mysql:host=localhost;dbname=firebase', 'user1', 'password'); //server details
 			$this->con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$this->con->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 			// This assumes that you have placed the Firebase credentials in the same directory
@@ -131,7 +132,7 @@ class Group
 	}
 
 	public function searchGroup($keyword){
-		$query = $this->con->query("SELECT group_uuid, group_name
+		$query = $this->con->query("SELECT group_uuid, group_name, created_by
 			FROM groups
 			WHERE group_name like '%$keyword%'
 				AND group_uuid IN (

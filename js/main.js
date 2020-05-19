@@ -43,6 +43,7 @@
 						$("#login-btn").html(btnHTML);
 						if (data.user.uid != "") {
 							window.location.href = "chat.php";
+							// window.location.href = "group-chat.php";
 						}
 					});
 				}else{

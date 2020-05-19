@@ -358,3 +358,25 @@ span.count {
 	right: 7px;
 	clip-path: polygon(0%0%,100%0%,0%100%);
 }
+
+.icon-read-detail {
+    float: right;
+    position: relative;
+    right: 3px;
+    top: 2px;
+    cursor: pointer;
+}
+
+.show-user-list {
+	height: 250px;
+	overflow-y: scroll;
+	line-height: 25px;
+}
+
+.show-user-list li {
+	margin-left: 15px;
+}
+
+.name {
+	cursor: pointer;
+}

@@ -93,7 +93,7 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 					var groupsHTML = '';
 					$(".groups").html(groupsHTML);
 					$.each(groups, function(index, value) {
-						groupsHTML = '<div class="group" group_uuid="'+value.group_uuid+'">'+
+						groupsHTML = '<div class="group" group_uuid="'+value.group_uuid+'" created_uuid="'+value.created_by+'">'+
 										'<div class="group-image"></div>'+
 										'<div class="group-details">'+
 											'<span>'+
@@ -152,19 +152,22 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 	$(document.body).on('click', '.group', function() {
 		var name = $(this).find("strong").text();
 		group_uuid = $(this).attr('group_uuid');
+		var created_uuid = $(this).attr('created_uuid');
 		getGroupMemberList(group_uuid);
 		$('.message-container').html('Connecting...!');
 
 		$(".name").text(name);
 		$(".attachment").show();
-		$(".add-group-member").show();
 		$(".add-group").hide();
 
 		chat_data = {
 			group_uuid : group_uuid,
-			user_uuid : user_uuid
+			user_uuid : user_uuid,
+			group_creater : created_uuid
 		};
 		$('.message-container').html('Say Hi in group - '+name);
+		if (chat_data.group_creater == chat_data.user_uuid)
+			$(".add-group-member").show();
 
 		realTime();
 	});
@@ -252,10 +255,12 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 						var divStrTime = '<div class="message-time">'+ strTime +'</div>';
 						var senderName = '';
 						var rightMsg = '';
+						var detailIcon = '';
 
 						if (change.doc.data().user_1_uuid == user_uuid) {
 							msgStart = '<div class="message-block received-message" id="'+change.doc.id+'">';
 							rightMsg = '<div class="right-msg-icon"></div>';
+							detailIcon = '<i class="fa fa-chevron-down icon-read-detail" aria-hidden="true" message_uuid="'+change.doc.data().message_uuid+'"></i>';
 						} else {
 							senderName = getGroupMemberName(change.doc.data().user_1_uuid);
 							senderName = '<p class="send-name">'+senderName+'</p>';
@@ -291,6 +296,7 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 											'<div class="message">'+
 												senderName+
 												actualMessage+
+												detailIcon+
 												divStrTime+
 											'</div>'+
 											rightMsg+
@@ -478,7 +484,7 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 					var groupsListHTML = '';
 					groupsListHTML += '<option value="">Select Group</option>';
 					$.each(groups, function(index, value) {
-						groupsListHTML += '<option value="'+value.group_uuid+'">'+
+						groupsListHTML += '<option value="'+value.group_uuid+'##'+value.created_by+'">'+
 											value.group_name+
 										'</option>';
 
@@ -496,7 +502,10 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 
 
 	$("select.groupList").change(function() {
-		var group_uuid = $(this).children("option:selected").val();
+		var group_data = $(this).children("option:selected").val();
+		var arrData = group_data.split("##");
+		var group_uuid = arrData[0];
+
 		if (group_uuid == '')
 			return;
 		getGroupMemberList(group_uuid);
@@ -508,16 +517,58 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 
 		$(".name").text(name);
 		$(".attachment").show();
-		$(".add-group-member").show();
 		$(".add-group").hide();
 
 		chat_data = {
 			group_uuid : group_uuid,
-			user_uuid : user_uuid
+			user_uuid : user_uuid,
+			group_creater : arrData[1]
 		};
 		$('.message-container').html('Say Hi in group - '+name);
+		if (chat_data.group_creater == chat_data.user_uuid)
+			$(".add-group-member").show();
 
 		realTime();
+	});
+
+
+	$(document.body).on('click', '.icon-read-detail', function() {
+		var message_uuid = $(this).attr('message_uuid');
+		db.collection('group-chat')
+			.where('message_uuid', '==', message_uuid)
+			.where('group_uuid', '==', chat_data.group_uuid)
+			.where('view_status', '==', 1)
+			.get()
+			.then(function(querySnapshot){
+				var usersListHTML = '';
+				let userName = '';
+				querySnapshot.docs.forEach(function(querySnapData){
+					if (querySnapData.data().user_2_uuid != chat_data.user_uuid) {
+						userName = getGroupMemberName(querySnapData.data().user_2_uuid);
+						if (userName)
+							usersListHTML += '<li>'+userName+'</li>';
+					}
+				});
+				$('.show-user-list').html(usersListHTML);
+				$('#memberListModel').modal('show');
+				$('#memberListModel').find('.modal-title').text('Read By');
+			});
+	});
+
+
+	$(document.body).on('click', '.name', function() {
+		// var userName = getGroupMemberName(chat_data.user_uuid);
+		var usersListHTML = '';
+		for (const item of groupMemberList) {
+			if (item.uuid == chat_data.group_creater) {
+				usersListHTML += '<li>'+ item.fullname +'(Admin)</li>';
+			} else {
+				usersListHTML += '<li>'+ item.fullname +'</li>';
+			}
+		}
+		$('.show-user-list').html(usersListHTML);
+		$('#memberListModel').modal('show');
+		$('#memberListModel').find('.modal-title').text('Group Info');
 	});
 
 
@@ -538,9 +589,9 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 	}
 
 
-	function getGroupMemberName(user_1_uuid){
+	function getGroupMemberName(user_uuid){
 		for (const item of groupMemberList) {
-			if (item.uuid == user_1_uuid) {
+			if (item.uuid == user_uuid) {
 				return item.fullname;
 			}
 		}
