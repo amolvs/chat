@@ -57,7 +57,8 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [], use
 								.get()
 								.then(function(querySnapshot){
 									var unreadCount = querySnapshot.size;
-									if (unreadCount == 0 || value.uuid == userRef) {
+									if (unreadCount == 0 || value.uuid == chat_data.chat_uuid) {
+										// if (unreadCount == 0 || value.uuid == userRef) {
 										if (value.uuid == userRef)
 											userRef = '';
 
@@ -97,8 +98,9 @@ var chat_data = {}, user_uuid, chatHTML = '', chat_uuid = "", userList = [], use
 
 
 	$(document.body).on('click', '.user', function() {
-		userRef = $(this).attr('uuid');
-		getUsers();
+		// userRef = $(this).attr('uuid');
+		// getUsers();
+		$(this).find(".count").remove();
 
 		var name = $(this).find("strong").text();
 		var user_1 = user_uuid;

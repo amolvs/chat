@@ -1,8 +1,9 @@
-var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], userRef = '', selectedUserList = [], groupMemberList = [];
+var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], selectedUserList = [], groupMemberList = [];
 
 	$(".attachment").hide();
 	$(".add-group").show();
 	$(".add-group-member").hide();
+
 
 	firebase.auth().onAuthStateChanged(function(user) {
 		if (user) {
@@ -57,7 +58,6 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 	$("#add-group-member-btn").on('click', function(e){
 		e.preventDefault();
 		var btnHTML = $(this).html();
-		// $(this).html("<img id='loader' src='images/loader.svg' alt='Loading...!' />");
 		$("#user_uuid_arr").val(selectedUserList);
 		$("#group_uuid").val(group_uuid);
 
@@ -93,53 +93,38 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 					var groupsHTML = '';
 					$(".groups").html(groupsHTML);
 					$.each(groups, function(index, value) {
-						groupsHTML = '<div class="group" group_uuid="'+value.group_uuid+'" created_uuid="'+value.created_by+'">'+
-										'<div class="group-image"></div>'+
-										'<div class="group-details">'+
-											'<span>'+
-												'<strong>'+value.group_name+'</strong>'+
-												// '<span class="count">'+unreadCount+'</span>'+
-											'</span>'+
-										'</div>'+
-									'</div>';
-
-						$(".groups").append(groupsHTML);
-						groupList.push({group_uuid: value.group_uuid, group_name: value.group_name});
-
-						/*db.collection('chat')
-							.where('chat_uuid', '==', value.chat_uuid)
+						db.collection('group-chat')
+							.where('group_uuid', '==', value.group_uuid)
 							.where('user_2_uuid', '==', user_uuid)
 							.where('view_status', '==', 0)
 							.get()
 							.then(function(querySnapshot){
 								var unreadCount = querySnapshot.size;
-								if (unreadCount == 0 || value.uuid == userRef) {
-									if (value.uuid == userRef)
-										userRef = '';
-
-									groupsHTML = '<div class="user" uuid="'+value.uuid+'">'+
-										'<div class="user-image"></div>'+
-										'<div class="user-details">'+
-											'<span>'+
-												'<strong>'+value.fullname+'</strong>'+
-											'</span>'+
-											loginStatus+
-										'</div>'+
-									'</div>';
+								if (unreadCount == 0 || value.group_uuid == chat_data.group_uuid) {
+									groupsHTML = '<div class="group" group_uuid="'+value.group_uuid+'" created_uuid="'+value.created_by+'">'+
+													'<div class="group-image"></div>'+
+													'<div class="group-details">'+
+														'<span>'+
+															'<strong>'+value.group_name+'</strong>'+
+														'</span>'+
+													'</div>'+
+												'</div>';
 								} else {
-									groupsHTML = '<div class="user" uuid="'+value.uuid+'">'+
-											'<div class="user-image"></div>'+
-											'<div class="user-details">'+
-												'<span>'+
-													'<strong>'+value.fullname+'</strong>'+
-													'<span class="count">'+unreadCount+'</span>'+
-												'</span>'+
-												loginStatus+
-											'</div>'+
-										'</div>';
+									groupsHTML = '<div class="group" group_uuid="'+value.group_uuid+'" created_uuid="'+value.created_by+'">'+
+													'<div class="group-image"></div>'+
+													'<div class="group-details">'+
+														'<span>'+
+															'<strong>'+value.group_name+'</strong>'+
+															'<span class="count">'+unreadCount+'</span>'+
+														'</span>'+
+													'</div>'+
+												'</div>';
 								}
-								$(".users").append(groupsHTML);
-							});*/
+
+								$(".groups").append(groupsHTML);
+							});
+
+						groupList.push({group_uuid: value.group_uuid, group_name: value.group_name});
 					});
 				}else{
 					// console.log(response.message);
@@ -150,6 +135,7 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 
 
 	$(document.body).on('click', '.group', function() {
+		$(this).find(".count").remove();
 		var name = $(this).find("strong").text();
 		group_uuid = $(this).attr('group_uuid');
 		var created_uuid = $(this).attr('created_uuid');
@@ -321,107 +307,10 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 	}
 
 
-	/*var newMessage = '';
-	function realTime() {
-		db.collection('chat')
-			.where('chat_uuid', '==', chat_data.chat_uuid)
-			.orderBy('time')
-			.onSnapshot(function(snapshot) {
-				newMessage = '';
-				// var userIcon = '<div class="user-icon"></div>';
-				snapshot.docChanges().forEach(function(change) {
-					if (change.doc.data().chat_uuid != chat_data.chat_uuid) {
-						return true;
-					}
-					if (change.type === "added") {
-						var myDate = new Date(1000 * change.doc.data().time.seconds);
-						var month = myDate.getMonth()+1;
-						var day = myDate.getDate();
-						var viewDate = (day<10 ? '0' : '') + day + '/' + (month<10 ? '0' : '') + month + '/' + myDate.getFullYear();
-						
-						var hours = myDate.getHours();
-						var minutes = myDate.getMinutes();
-						var ampm = hours >= 12 ? 'PM' : 'AM';
-						hours = hours % 12;
-						hours = hours ? hours : 12; // the hour '0' should be '12'
-						minutes = minutes < 10 ? '0'+minutes : minutes;
-						var strTime = hours + ':' + minutes + ' ' + ampm;
-
-						var actualMessage = '';
-						if (change.doc.data().message_type == 'text') {
-							actualMessage = change.doc.data().message;
-						} else {
-							var url = 'upload/' + change.doc.data().message;
-							if (fileExists(url)) {
-								if (change.doc.data().message_type == 'image') {
-									actualMessage = '<img src="upload/'+change.doc.data().message+'" width="200" height="200">';
-								} else if (change.doc.data().message_type == 'video') {
-									actualMessage = '<video width="320" height="240" controls>'+
-										'<source src="upload/'+change.doc.data().message+'" type="video/mp4">'+
-									'</video>';
-								} else if (change.doc.data().message_type == 'audio') {
-									actualMessage = '<audio controls>'+
-										'<source src="upload/'+change.doc.data().message+'" type="audio/mpeg">'+
-									'</audio>';
-								}
-							} else {
-								actualMessage = 'file not found';
-							}
-						}
-
-
-						var readStatus = '';
-						if (change.doc.data().user_1_uuid == user_uuid) {
-							msgStart = '<div class="message-block received-message" id="'+change.doc.id+'">';
-							if (change.doc.data().view_status)
-								readStatus = '<i class="fa fa-check-double read-status"></i>';
-							else
-								readStatus = '<i class="fa fa-check read-status"></i>';
-							// readStatus = '<i class="fa fa-check read-status"></i>';
-						} else {
-							msgStart = '<div class="message-block" id="'+change.doc.id+'">';
-						}
-						var divStrTime = '<div class="message-time">'+ strTime + readStatus +'</div>';
-
-						if($("#" + change.doc.id).length == 0) {
-							newMessage	+=	msgStart+
-											// userIcon+
-											'<div class="message">'+
-												actualMessage+
-												divStrTime+
-											'</div>'+
-										'</div>';
-						}
-						if (change.doc.data().user_2_uuid == user_uuid) {
-							db.collection("chat").doc(change.doc.id).update({view_status: 1});
-						}
-					}
-					if (change.type === "modified") {
-						if (change.doc.data().user_1_uuid == user_uuid) {
-							$("#"+change.doc.id).find(".read-status").removeClass("fa-check");
-							$("#"+change.doc.id).find(".read-status").addClass("fa-check-double");
-							return true;
-						}
-					}
-					if (change.type === "removed") {
-					}
-				});
-
-				if (chatHTML != newMessage) {
-					$('.message-container').append(newMessage);
-				}
-
-				$(".chats").scrollTop($(".chats")[0].scrollHeight);
-			});
-	}*/
-
-
 	$(".search-user-group").keyup(function() {
 		var searchTxt = $(".search-user-group").val();
-		// $(".search-users-list").hide();
 		if (searchTxt == '')
 			return;
-		// $(".search-users-list").show();
 		$(".attachment").show();
 
 		$.ajax({
@@ -598,7 +487,7 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 		return '';
 	}
 
-	/*$("#file-id").change(function () {
+	$("#file-id").change(function () {
 		var fd = new FormData();
 		var files = $('#file-id')[0].files[0];
 		fd.append('file', files);
@@ -626,31 +515,35 @@ var chat_data = {}, user_uuid, chatHTML = '', group_uuid = "", groupList = [], u
 					} else if (extension == 'mp3') {
 						file_type = 'audio';
 					}
+					var time = new Date();
+					var timestamp = time.getTime();
+					var message_uuid = user_uuid+'-'+timestamp;
 
-					db.collection('chat')
-						.add({
+					$.each(groupMemberList, function(index, value){
+						data = {
+							group_uuid : chat_data.group_uuid,
+							message_uuid : message_uuid,
 							message : response,
-							user_1_uuid : user_uuid,
-							user_2_uuid : chat_data.user_2_uuid,
-							chat_uuid : chat_data.chat_uuid,
-							view_status : 0,
+							user_1_uuid : chat_data.user_uuid,
+							user_2_uuid : value.uuid,
+							user_2_name : value.fullname,
+							view_status : (chat_data.user_uuid == value.uuid) ? 1 : 0,
 							message_type : file_type,
-							time : new Date(),
-						})
-						.then(function(docRef) {
-							$('#file-id').val('');
-						})
-						.catch(function(error) {
-							// console.error("Error adding document: ", error);
-						});
+							time : time,
+						};
+
+						db.collection('group-chat').add(data);
+					});
+					$('#file-id').val('');
 				}
 			}
 		});
-	});*/
+	});
 
-	/*function fileExists(file_url){
+
+	function fileExists(file_url){
 		var http = new XMLHttpRequest();
 		http.open('HEAD', file_url, false);
 		http.send();
 		return http.status != 404;
-	}*/
+	}
